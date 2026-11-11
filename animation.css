@@ -1,0 +1,170 @@
+/* ============================================================
+   EXTRA ANIMATION LAYER  (loaded after style.css)
+   Pairs with animations.js. Everything here is purely additive.
+   ============================================================ */
+
+body.loading { overflow: hidden; }
+
+/* ---------- Loader polish ---------- */
+.loader-mark { animation: markIn 1s cubic-bezier(.2,.9,.3,1) both; }
+.loader-mark span { display: inline-block; animation: dotBlink 1s steps(2) infinite; }
+.loader-name { animation: fadeUp .8s .35s both; }
+.loader-caption { animation: fadeUp .8s .5s both; }
+.loader-caption span:last-child { font-variant-numeric: tabular-nums; color: var(--red); }
+.site-loader .loader-content { transition: transform .65s ease, opacity .5s ease; }
+.site-loader.is-hidden .loader-content { transform: scale(1.12); opacity: 0; }
+@keyframes markIn { from { opacity: 0; transform: translateY(34px) scale(.9); letter-spacing: 18px; } to { opacity: 1; transform: none; letter-spacing: -4px; } }
+@keyframes dotBlink { 50% { opacity: 0; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Scroll progress bar ---------- */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 9000;
+  background: linear-gradient(90deg, var(--red), #ff7a7f);
+  transform-origin: left; transform: scaleX(0); pointer-events: none;
+  box-shadow: 0 0 12px rgba(229,43,50,.7);
+}
+
+/* ---------- Custom cursor (desktop only) ---------- */
+html.has-cursor, html.has-cursor a, html.has-cursor button, html.has-cursor label, html.has-cursor select { cursor: none; }
+.cursor-dot, .cursor-ring, .cursor-glow { position: fixed; left: 0; top: 0; pointer-events: none; }
+.cursor-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); z-index: 10050; }
+.cursor-ring {
+  width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.5); z-index: 10049;
+  display: grid; place-items: center;
+  font: 700 9px 'Space Grotesk', sans-serif; letter-spacing: .14em; color: #fff;
+  transition: width .3s, height .3s, background .3s, border-color .3s;
+}
+.cursor-ring.hover { width: 64px; height: 64px; background: rgba(229,43,50,.16); border-color: var(--red); }
+.cursor-ring.label { width: 88px; height: 88px; background: var(--red); border-color: var(--red); }
+.cursor-glow { width: 560px; height: 560px; border-radius: 50%; z-index: 0; background: radial-gradient(circle, rgba(229,43,50,.17), transparent 62%); }
+.burst { position: fixed; width: 6px; height: 6px; border-radius: 50%; background: var(--red); pointer-events: none; z-index: 10060; }
+
+/* ---------- Ambient drifting orbs ---------- */
+.section { overflow: clip; }
+.section::before {
+  content: ""; position: absolute; width: 520px; height: 520px; left: -160px; top: 8%;
+  border-radius: 50%; background: radial-gradient(circle, rgba(229,43,50,.10), transparent 65%);
+  animation: orb 14s ease-in-out infinite alternate; pointer-events: none; z-index: -1;
+}
+.section.alt::before, .contact::before { left: auto; right: -160px; animation-duration: 18s; animation-direction: alternate-reverse; }
+.hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+.hero::before { width: 620px; height: 620px; right: -140px; top: -120px; background: radial-gradient(circle, rgba(229,43,50,.20), transparent 65%); animation: orb 12s ease-in-out infinite alternate; }
+.hero::after { width: 420px; height: 420px; left: -120px; bottom: -120px; background: radial-gradient(circle, rgba(229,43,50,.12), transparent 65%); animation: orb 16s ease-in-out infinite alternate-reverse; }
+@keyframes orb { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(70px,50px,0) scale(1.25); } }
+
+/* ---------- Hero ---------- */
+.hero h1 { perspective: 800px; }
+.hw { display: inline-block; white-space: nowrap; }
+.ch { display: inline-block; will-change: transform, opacity; }
+.hero h1.ready .ch { transition: transform .35s cubic-bezier(.3,1.6,.5,1), color .25s; }
+.hero h1.ready .ch:hover { transform: translateY(-10px) rotate(-5deg); }
+.hero h1 .block.red .ch:hover { color: #fff; }
+.hero h1 .block:not(.red):not(.outline) .ch:hover { color: var(--red); }
+.hero h1 .block.red { animation: redGlow 3.2s ease-in-out infinite; }
+@keyframes redGlow { 0%,100% { text-shadow: 0 0 0 rgba(229,43,50,0); } 50% { text-shadow: 0 0 28px rgba(229,43,50,.55); } }
+.hero-cta .btn:first-child { animation: btnGlow 2.8s ease-in-out infinite; }
+@keyframes btnGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(229,43,50,.55); } 50% { box-shadow: 0 0 0 14px rgba(229,43,50,0); } }
+
+.portrait::after {
+  content: ""; position: absolute; left: 0; right: 0; top: -90px; height: 90px; z-index: 2; pointer-events: none;
+  background: linear-gradient(transparent, rgba(229,43,50,.30), transparent);
+  animation: scan 5s linear infinite;
+}
+@keyframes scan { to { top: 100%; } }
+.portrait-grid { z-index: 2; opacity: .14; animation: gridMove 14s linear infinite; }
+@keyframes gridMove { to { background-position: 40px 40px, 40px 40px; } }
+.corner-br { transform-origin: 100% 100%; animation: cornerPulse 3s ease-in-out infinite; }
+.corner-tl { transform-origin: 0 0; animation: cornerPulse 3s ease-in-out infinite 1.5s; }
+@keyframes cornerPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+
+/* ---------- Titles / kickers ---------- */
+.w { display: inline-block; overflow: hidden; vertical-align: bottom; padding: .1em 0; margin: -.1em 0; }
+.wi { display: inline-block; will-change: transform; }
+html.anim .kicker::after { transform: scaleX(0); transform-origin: left; transition: transform .9s .3s cubic-bezier(.2,.8,.2,1); }
+html.anim .kicker.in::after { transform: scaleX(1); }
+
+/* ---------- Buttons ---------- */
+.btn { position: relative; overflow: hidden; }
+.btn::before {
+  content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent);
+  transform: skewX(-20deg); transition: left .7s; pointer-events: none;
+}
+.btn:hover::before { left: 130%; }
+[data-magnetic] { transition-property: background, color, border-color, box-shadow !important; }
+.ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,.45); transform: scale(0); animation: ripple .7s ease-out forwards; pointer-events: none; }
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+.to-top { animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* ---------- Cards: spotlight + tilt ---------- */
+.spot { position: relative; }
+.spot::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(229,43,50,.18), transparent 45%);
+}
+.spot:hover::after { opacity: 1; }
+[data-tilt] { transition: border-color .3s !important; transform-style: preserve-3d; }
+.service .num { display: inline-block; transition: color .3s, transform .4s cubic-bezier(.3,1.6,.5,1); }
+.service:hover .num { transform: scale(1.15) rotate(-4deg); }
+.service li { transition: transform .3s; }
+.service:hover li { transform: translateX(4px); }
+.service:hover li:nth-child(2) { transition-delay: .05s; }
+.service:hover li:nth-child(3) { transition-delay: .1s; }
+
+/* ---------- Skills / tools ---------- */
+.bar i { position: relative; }
+.bar i::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation: shimmer 2.4s ease-in-out infinite 1.5s;
+}
+@keyframes shimmer { to { transform: translateX(100%); } }
+.tool b { display: inline-block; animation: bob 3.2s ease-in-out infinite; }
+.tool:nth-child(2) b { animation-delay: -.6s; }
+.tool:nth-child(3) b { animation-delay: -1.2s; }
+.tool:nth-child(4) b { animation-delay: -1.8s; }
+.tool:nth-child(5) b { animation-delay: -2.4s; }
+.tool:hover b { animation: spinPop .6s ease; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes spinPop { 50% { transform: scale(1.3) rotate(12deg); } }
+.stats div { transition: transform .3s; }
+.stats div:hover { transform: translateY(-4px); }
+
+/* ---------- Works ---------- */
+.work-thumb::after {
+  content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%; z-index: 3; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.2), transparent);
+  transform: skewX(-20deg); transition: left .9s;
+}
+.work:hover .work-thumb::after { left: 140%; }
+.work-art span { animation: bob 4s ease-in-out infinite; }
+
+/* ---------- FAQ ---------- */
+.faq.open .faq-a p { animation: faqIn .5s .1s both; }
+@keyframes faqIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Form ---------- */
+.form input:focus, .form select:focus, .form textarea:focus { box-shadow: 0 0 0 3px rgba(229,43,50,.18); }
+.form .invalid { animation: shake .4s; }
+@keyframes shake { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+.form-msg:not(:empty) { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+.contact-link .ci { transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
+.contact-link:hover .ci { transform: rotate(-10deg) scale(1.12); }
+
+/* ---------- Floating buttons ---------- */
+.float-btn.wa svg { animation: wiggle 5s ease-in-out infinite 4s; }
+@keyframes wiggle { 0%,12%,100% { transform: rotate(0); } 3% { transform: rotate(-16deg); } 6% { transform: rotate(14deg); } 9% { transform: rotate(-8deg); } }
+
+/* ---------- Footer ---------- */
+.footer .logo { display: inline-block; transition: letter-spacing .4s, color .3s; }
+.footer .logo:hover { letter-spacing: .18em; color: var(--red); }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-mark, .loader-name, .loader-caption, .loader-mark span, .section::before, .hero::before, .hero::after,
+  .portrait::after, .portrait-grid, .corner, .hero-cta .btn, .hero h1 .block.red, .to-top, .bar i::after,
+  .tool b, .work-art span, .float-btn.wa svg { animation: none !important; }
+  .cursor-dot, .cursor-ring, .cursor-glow, .scroll-progress { display: none; }
+}
