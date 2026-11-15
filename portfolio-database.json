@@ -1,0 +1,56 @@
+{
+  "projects": {
+    "project-1": {
+      "title": "Business Website",
+      "category": "web",
+      "format": "landscape",
+      "label": "Web Development",
+      "year": "2026",
+      "art": "linear-gradient(135deg,#1c1c1c,#3a0d10)",
+      "mark": "WEB",
+      "image": "",
+      "link": "https://example.com",
+      "order": 1
+    },
+    "project-2": {
+      "title": "Management System",
+      "category": "system",
+      "format": "landscape",
+      "label": "Admin Dashboard",
+      "year": "2026",
+      "art": "linear-gradient(135deg,#101820,#1d2b3a)",
+      "mark": "SYS",
+      "image": "",
+      "link": "",
+      "order": 2
+    },
+    "project-3": {
+      "title": "Social Media Creatives",
+      "category": "design",
+      "format": "poster",
+      "label": "Photoshop Design",
+      "year": "2026",
+      "art": "linear-gradient(135deg,#2a0a0c,#E52B32)",
+      "mark": "Ps",
+      "image": "",
+      "link": "",
+      "order": 3
+    },
+    "project-4": {
+      "title": "Brochure Layout",
+      "category": "print",
+      "format": "poster",
+      "label": "InDesign Layout",
+      "year": "2026",
+      "art": "linear-gradient(135deg,#1a1a1a,#444)",
+      "mark": "Id",
+      "image": "",
+      "link": "",
+      "order": 4
+    }
+  },
+  "skills": {},
+  "services": {},
+  "testimonials": {},
+  "messages": {}
+}

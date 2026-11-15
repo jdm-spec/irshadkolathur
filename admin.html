@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Upload Projects &amp; Posters | Irshad Kolathur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --admin-bg: #09090b;
+      --admin-surface: #121215;
+      --admin-border: #222226;
+      --admin-hover: #1b1b20;
+    }
+
+    body {
+      background: var(--admin-bg);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Admin Header */
+    .admin-bar {
+      border-bottom: 1px solid var(--admin-border);
+      background: rgba(9, 9, 11, 0.95);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 0;
+    }
+    .admin-bar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Anton', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: .05em;
+    }
+    .admin-title span { color: var(--red); }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--admin-border);
+    }
+    .badge-status i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+    .badge-status.offline i { background: #f59e0b; }
+
+    .admin-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* Admin Tabs */
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--admin-border);
+      padding: 0 0 16px 0;
+      margin: 28px 0 36px 0;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid var(--admin-border);
+      color: var(--grey);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      cursor: pointer;
+      transition: .25s;
+    }
+    .tab-btn:hover { color: #fff; border-color: #fff; }
+    .tab-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    /* Tab Content Layouts */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* Upload Form Grid */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .upload-grid { grid-template-columns: 1fr; }
+    }
+
+    .admin-card {
+      background: var(--admin-surface);
+      border: 1px solid var(--admin-border);
+      padding: 32px;
+    }
+
+    /* Presets */
+    .preset-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .preset-btn {
+      padding: 8px 14px;
+      background: #1c1c22;
+      border: 1px solid var(--admin-border);
+      color: #ccc;
+      font-size: .75rem;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s;
+    }
+    .preset-btn:hover { border-color: var(--red); color: #fff; }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--grey);
+      margin-bottom: 8px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: #09090b;
+      border: 1px solid var(--admin-border);
+      color: #fff;
+      font: 400 .9rem 'Inter', sans-serif;
+      outline: 0;
+      transition: border-color .3s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--red);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* File Drop Area */
+    .drop-zone {
+      border: 2px dashed var(--admin-border);
+      padding: 28px 20px;
+      text-align: center;
+      background: rgba(0,0,0,.3);
+      cursor: pointer;
+      transition: .3s;
+      position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--red);
+      background: rgba(229,43,50,.04);
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .drop-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .drop-zone p { font-size: .85rem; color: #aaa; margin: 0; }
+    .drop-zone small { color: var(--grey); font-size: .7rem; }
+
+    /* Upload status bar */
+    .upload-progress {
+      display: none;
+      margin-top: 12px;
+      background: #111;
+      border: 1px solid var(--admin-border);
+      padding: 8px 12px;
+      font-size: .78rem;
+      color: #93c5fd;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .upload-progress.success { color: #6ee7b7; border-color: rgba(16,185,129,.4); }
+    .upload-progress.error { color: #fca5a5; border-color: rgba(239,68,68,.4); }
+
+    /* Live Preview Section */
+    .preview-sticky {
+      position: sticky;
+      top: 96px;
+    }
+    .preview-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .75rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--grey);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .preview-card-wrap {
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    /* Items Table */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    .items-table th {
+      text-align: left;
+      padding: 14px 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--grey);
+      border-bottom: 1px solid var(--admin-border);
+    }
+    .items-table td {
+      padding: 16px;
+      border-bottom: 1px solid var(--admin-border);
+      vertical-align: middle;
+    }
+    .items-table tr:hover { background: var(--admin-hover); }
+    .item-thumb-img {
+      width: 72px;
+      height: 48px;
+      object-fit: cover;
+      border: 1px solid var(--admin-border);
+      display: block;
+      background: #111;
+    }
+    .item-thumb-gradient {
+      width: 72px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      font-family: 'Anton', sans-serif;
+      font-size: 1.1rem;
+      color: rgba(255,255,255,.2);
+      border: 1px solid var(--admin-border);
+    }
+    .btn-delete {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid #442222;
+      color: #ff8a8e;
+      font-size: .72rem;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .btn-delete:hover {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    /* Passcode Lock Modal */
+    .lock-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 5, 8, 0.96);
+      backdrop-filter: blur(14px);
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .lock-card {
+      background: var(--admin-surface);
+      border: 1px solid var(--admin-border);
+      max-width: 380px;
+      width: 100%;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .lock-card h2 {
+      font-family: 'Anton', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: .04em;
+      margin-bottom: 8px;
+    }
+    .lock-card p {
+      color: var(--grey);
+      font-size: .85rem;
+      margin-bottom: 24px;
+    }
+    .lock-card input {
+      width: 100%;
+      padding: 14px;
+      background: #09090b;
+      border: 1px solid var(--admin-border);
+      color: #fff;
+      text-align: center;
+      font-size: 1.3rem;
+      letter-spacing: .3em;
+      margin-bottom: 18px;
+      outline: 0;
+    }
+    .lock-card input:focus { border-color: var(--red); }
+    .lock-err {
+      color: #ff8a8e;
+      font-size: .8rem;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #121215;
+      border: 1px solid var(--admin-border);
+      padding: 14px 22px;
+      color: #fff;
+      font-size: .85rem;
+      font-family: 'Space Grotesk', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.6);
+      z-index: 90;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: .3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toast.success { border-left: 4px solid #10b981; }
+    .toast.error { border-left: 4px solid var(--red); }
+  </style>
+</head>
+<body>
+
+  <!-- PASSCODE LOCK OVERLAY -->
+  <div class="lock-overlay" id="lockOverlay">
+    <div class="lock-card">
+      <h2>IRSHAD<span>.</span>ADMIN</h2>
+      <p>Enter your 4-digit admin passcode to access the upload portal.</p>
+      <form id="lockForm">
+        <input type="password" id="passcodeInput" maxlength="10" placeholder="••••" autocomplete="off" autofocus>
+        <button type="submit" class="btn btn-full">Unlock Dashboard</button>
+        <div class="lock-err" id="lockErr"></div>
+      </form>
+      <small style="color:#555;display:block;margin-top:16px;">Default passcode: <b>1234</b></small>
+    </div>
+  </div>
+
+  <!-- TOP ADMIN BAR -->
+  <header class="admin-bar">
+    <div class="container admin-bar-inner">
+      <div class="admin-title">
+        IK<span>.</span> ADMIN <small style="font-size:.7rem;color:var(--grey)">PROJECTS &amp; POSTERS</small>
+        <span class="badge-status" id="dbStatusBadge"><i></i> Loading...</span>
+      </div>
+      <div class="admin-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" target="_blank">← View Portfolio</a>
+        <button class="btn btn-sm" id="lockBtn" style="background:#222;border-color:#333">Lock</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="flex:1;padding-bottom:60px;">
+
+    <!-- NAVIGATION TABS -->
+    <nav class="admin-tabs">
+      <button class="tab-btn active" data-tab="uploadTab">+ Upload Project or Poster</button>
+      <button class="tab-btn" data-tab="manageTab">📁 Manage Items (<span id="itemCount">0</span>)</button>
+      <button class="tab-btn" data-tab="messagesTab">📬 Inquiries (<span id="msgCount">0</span>)</button>
+      <button class="tab-btn" data-tab="settingsTab">⚙ API &amp; Settings</button>
+    </nav>
+
+    <!-- ========================================================
+         TAB 1: UPLOAD PROJECT OR POSTER
+         ======================================================== -->
+    <section class="tab-pane active" id="uploadTab">
+      <div class="upload-grid">
+        
+        <!-- Form Column -->
+        <div class="admin-card">
+          <p class="kicker" style="margin-bottom:12px">01 / Create item</p>
+          <h2 style="font-family:'Anton',sans-serif;font-size:1.8rem;margin-bottom:16px">NEW <span class="red">UPLOAD.</span></h2>
+
+          <!-- Quick Presets -->
+          <div class="preset-buttons">
+            <span style="font-size:.75rem;color:var(--grey);align-self:center">Preset:</span>
+            <button type="button" class="preset-btn" id="presetPoster">🎨 Poster / Graphic</button>
+            <button type="button" class="preset-btn" id="presetWeb">💻 Website</button>
+            <button type="button" class="preset-btn" id="presetSystem">⚙ Management System</button>
+          </div>
+
+          <form id="uploadForm">
+            <div class="form-group">
+              <label>Item Title *</label>
+              <input type="text" id="itemTitle" required placeholder="e.g. Neon Cyberpunk Concept Poster">
+            </div>
+
+            <!-- Card Size & Aspect Ratio Format -->
+            <div class="form-group">
+              <label>Display Format &amp; Card Size *</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#09090b;border:1px solid var(--admin-border);cursor:pointer;">
+                  <input type="radio" name="itemFormat" value="poster" id="fmtPoster" checked style="width:auto;margin:0;">
+                  <div>
+                    <b style="color:#fff;display:block;font-size:.82rem">🖼 Poster Size (3:4)</b>
+                    <small style="color:var(--grey);font-size:.7rem">Vertical for posters &amp; graphics</small>
+                  </div>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#09090b;border:1px solid var(--admin-border);cursor:pointer;">
+                  <input type="radio" name="itemFormat" value="landscape" id="fmtLandscape" style="width:auto;margin:0;">
+                  <div>
+                    <b style="color:#fff;display:block;font-size:.82rem">💻 Landscape (16:10)</b>
+                    <small style="color:var(--grey);font-size:.7rem">Horizontal for websites &amp; systems</small>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Category *</label>
+                <select id="itemCategory" required>
+                  <option value="design">Poster / Creative Design</option>
+                  <option value="web">Website Development</option>
+                  <option value="system">Management System</option>
+                  <option value="print">Brochure &amp; Print Layout</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Discipline / Subtitle *</label>
+                <input type="text" id="itemLabel" required placeholder="e.g. Photoshop Design">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Year</label>
+                <input type="text" id="itemYear" value="2026" placeholder="2026">
+              </div>
+
+              <div class="form-group">
+                <label>Badge / Tag</label>
+                <input type="text" id="itemMark" value="Ps" placeholder="e.g. Ps, WEB, SYS, Id">
+              </div>
+            </div>
+
+            <!-- Image Upload to ImageKit -->
+            <div class="form-group">
+              <label>Poster / Project Image</label>
+              <div class="drop-zone" id="dropZone">
+                <span class="drop-icon">🖼</span>
+                <p><strong>Click to choose image</strong> or drag and drop</p>
+                <small>PNG, JPG, WebP (Uploaded directly to ImageKit CDN)</small>
+                <input type="file" id="fileInput" accept="image/*">
+              </div>
+
+              <div class="upload-progress" id="uploadProgress">
+                <span id="uploadProgressText">Uploading to ImageKit...</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>ImageKit URL or Relative Path</label>
+              <input type="text" id="itemImageUrl" placeholder="Auto-filled on upload, or paste ImageKit URL">
+              <small style="color:#666;font-size:.72rem;display:block;margin-top:4px;">When you select a file above, it is automatically uploaded to ImageKit and fills this box.</small>
+            </div>
+
+            <!-- Website Live Link / Action -->
+            <div class="form-group" id="webLinkGroup">
+              <label>Website Live Link (URL)</label>
+              <input type="url" id="itemLink" placeholder="https://example.com">
+              <small style="color:#888;font-size:.72rem;display:block;margin-top:4px;">
+                🌐 <b>For Website Works:</b> Enter your live website URL here. Visitors will see a <b>"Live Site ↗"</b> badge on your portfolio! Leave empty for posters to open WhatsApp inquiry.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label>Display Order (Priority)</label>
+              <input type="number" id="itemOrder" value="1" min="1" max="99">
+            </div>
+
+            <button type="submit" class="btn btn-full" id="publishBtn" style="margin-top:10px">
+              Publish Project / Poster ↗
+            </button>
+          </form>
+        </div>
+
+        <!-- Live Preview Column -->
+        <div class="preview-sticky">
+          <div class="preview-header">
+            <span>Live Portfolio Card Preview</span>
+            <span style="color:var(--red)" id="previewSizeBadge">Poster Size (3:4)</span>
+          </div>
+
+          <div class="preview-card-wrap">
+            <div class="work is-poster" id="previewCard">
+              <div class="work-thumb is-poster" id="previewThumb" style="aspect-ratio:3/4;">
+                <div class="work-art" id="previewArt" style="background:linear-gradient(135deg,#2a0a0c,#E52B32);">
+                  <span id="previewMark">Ps</span>
+                </div>
+                <div class="work-over"><em id="previewOverlayText">Request Poster / Design ↗</em></div>
+                <span class="work-tag" id="previewYear">2026</span>
+              </div>
+              <div class="work-info">
+                <div>
+                  <h3 id="previewTitle">Project or Poster Title</h3>
+                  <p id="previewSubtitle">Photoshop Design</p>
+                  <span class="work-site-badge" id="previewSiteBadge" style="display:none;">🌐 Live Site ↗</span>
+                </div>
+                <b aria-hidden="true">↗</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card" style="margin-top:24px;padding:20px;font-size:.82rem;color:var(--grey)">
+            <b style="color:#fff;display:block;margin-bottom:6px">💡 Tip for Posters &amp; High-Res Graphics</b>
+            ImageKit automatically compresses high-res Photoshop posters into modern <code>WebP/AVIF</code> formats with lossless quality, so your portfolio loads instantly even with 4K artwork!
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 2: MANAGE UPLOADED ITEMS
+         ======================================================== -->
+    <section class="tab-pane" id="manageTab">
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <h2 style="font-family:'Anton',sans-serif;font-size:1.8rem">ALL <span class="red">WORKS &amp; POSTERS.</span></h2>
+            <p style="color:var(--grey);font-size:.85rem">Live items currently stored in Firebase.</p>
+          </div>
+          <button class="btn btn-sm" id="refreshItemsBtn">↻ Refresh List</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Label</th>
+                <th>Year</th>
+                <th>Source</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTableBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--grey)">Loading items from Firebase...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 3: CLIENT INQUIRIES
+         ======================================================== -->
+    <section class="tab-pane" id="messagesTab">
+      <div class="admin-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <h2 style="font-family:'Anton',sans-serif;font-size:1.8rem">CLIENT <span class="red">INQUIRIES.</span></h2>
+            <p style="color:var(--grey);font-size:.85rem">Messages submitted via your portfolio contact form.</p>
+          </div>
+          <button class="btn btn-sm" id="refreshMsgsBtn">↻ Refresh Inquiries</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Type</th>
+                <th>Budget</th>
+                <th>Details</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="messagesTableBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--grey)">Loading inquiries...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 4: SETTINGS & API KEYS
+         ======================================================== -->
+    <section class="tab-pane" id="settingsTab">
+      <div class="admin-card" style="max-width:680px">
+        <h2 style="font-family:'Anton',sans-serif;font-size:1.8rem;margin-bottom:12px">SERVICE <span class="red">STATUS.</span></h2>
+        
+        <div style="margin-bottom:24px;display:grid;gap:12px">
+          <div style="padding:14px;background:#18181c;border:1px solid var(--admin-border);">
+            <b style="display:block;margin-bottom:4px">🔥 Firebase Status</b>
+            <span id="cfgFirebaseStatus" style="font-size:.85rem;color:#ccc">Checking...</span>
+          </div>
+
+          <div style="padding:14px;background:#18181c;border:1px solid var(--admin-border);">
+            <b style="display:block;margin-bottom:4px">🖼 ImageKit Status</b>
+            <span id="cfgImageKitStatus" style="font-size:.85rem;color:#ccc">Checking...</span>
+          </div>
+        </div>
+
+        <h3 style="font-family:'Anton',sans-serif;font-size:1.3rem;margin-bottom:12px">CHANGE ADMIN PASSCODE</h3>
+        <form id="passcodeChangeForm" style="display:flex;gap:12px;align-items:center;max-width:400px">
+          <input type="text" id="newPasscodeInput" placeholder="New passcode" style="padding:10px 14px;background:#09090b;border:1px solid var(--admin-border);color:#fff">
+          <button type="submit" class="btn btn-sm">Save Passcode</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast"></div>
+
+  <!-- FIREBASE SCRIPTS (Compat v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <!-- IMAGEKIT SCRIPT -->
+  <script src="https://unpkg.com/imagekit-javascript/dist/imagekit-javascript.min.js"></script>
+
+  <!-- CONFIGURATIONS -->
+  <script src="firebase-config.js"></script>
+  <script src="imagekit-config.js"></script>
+
+  <!-- ADMIN APPLICATION LOGIC -->
+  <script>
+    (function () {
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+      // Passcode Management
+      const PASSCODE_KEY = "ik_admin_passcode";
+      const AUTH_KEY = "ik_admin_authed";
+      const getStoredPasscode = () => localStorage.getItem(PASSCODE_KEY) || "1234";
+
+      const lockOverlay = $("#lockOverlay");
+      const lockForm = $("#lockForm");
+      const passcodeInput = $("#passcodeInput");
+      const lockErr = $("#lockErr");
+      const lockBtn = $("#lockBtn");
+
+      function checkAuth() {
+        if (sessionStorage.getItem(AUTH_KEY) === "true") {
+          lockOverlay.style.display = "none";
+        } else {
+          lockOverlay.style.display = "grid";
+          passcodeInput.focus();
+        }
+      }
+
+      lockForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const entered = passcodeInput.value.trim();
+        if (entered === getStoredPasscode()) {
+          sessionStorage.setItem(AUTH_KEY, "true");
+          lockOverlay.style.display = "none";
+          passcodeInput.value = "";
+          lockErr.textContent = "";
+          loadAllData();
+        } else {
+          lockErr.textContent = "Incorrect passcode. Please try again.";
+        }
+      });
+
+      lockBtn.addEventListener("click", () => {
+        sessionStorage.removeItem(AUTH_KEY);
+        checkAuth();
+      });
+
+      checkAuth();
+
+      // Passcode Change
+      $("#passcodeChangeForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const np = $("#newPasscodeInput").value.trim();
+        if (np.length >= 4) {
+          localStorage.setItem(PASSCODE_KEY, np);
+          showToast("Admin passcode updated successfully!", "success");
+          $("#newPasscodeInput").value = "";
+        } else {
+          showToast("Passcode must be at least 4 characters.", "error");
+        }
+      });
+
+      // Toast Helper
+      const toastEl = $("#toast");
+      let toastTimer = null;
+      function showToast(text, type = "success") {
+        clearTimeout(toastTimer);
+        toastEl.textContent = text;
+        toastEl.className = `toast show ${type}`;
+        toastTimer = setTimeout(() => toastEl.classList.remove("show"), 4500);
+      }
+
+      // Tab Switching
+      $$(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          $$(".tab-btn").forEach(b => b.classList.remove("active"));
+          $$(".tab-pane").forEach(p => p.classList.remove("active"));
+          btn.classList.add("active");
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.add("active");
+          if (btn.dataset.tab === "manageTab") renderItemsTable();
+          if (btn.dataset.tab === "messagesTab") renderMessagesTable();
+        });
+      });
+
+      // Presets
+      $("#presetPoster").addEventListener("click", () => {
+        $("#fmtPoster").checked = true;
+        $("#itemCategory").value = "design";
+        $("#itemLabel").value = "Photoshop Creative Poster";
+        $("#itemMark").value = "Ps";
+        updateLivePreview();
+      });
+
+      $("#presetWeb").addEventListener("click", () => {
+        $("#fmtLandscape").checked = true;
+        $("#itemCategory").value = "web";
+        $("#itemLabel").value = "Website Development";
+        $("#itemMark").value = "WEB";
+        $("#itemLink").focus();
+        updateLivePreview();
+      });
+
+      $("#presetSystem").addEventListener("click", () => {
+        $("#fmtLandscape").checked = true;
+        $("#itemCategory").value = "system";
+        $("#itemLabel").value = "Admin Dashboard";
+        $("#itemMark").value = "SYS";
+        updateLivePreview();
+      });
+
+      // Category change auto-format selector
+      $("#itemCategory").addEventListener("change", (e) => {
+        if (e.target.value === "design" || e.target.value === "print") {
+          $("#fmtPoster").checked = true;
+        } else {
+          $("#fmtLandscape").checked = true;
+        }
+        updateLivePreview();
+      });
+
+      $("#fmtPoster").addEventListener("change", updateLivePreview);
+      $("#fmtLandscape").addEventListener("change", updateLivePreview);
+
+      // Live Preview Synchronization
+      const itemTitle = $("#itemTitle");
+      const itemCategory = $("#itemCategory");
+      const itemLabel = $("#itemLabel");
+      const itemYear = $("#itemYear");
+      const itemMark = $("#itemMark");
+      const itemImageUrl = $("#itemImageUrl");
+      const itemLink = $("#itemLink");
+
+      function updateLivePreview() {
+        const isPoster = $("#fmtPoster").checked;
+        $("#previewTitle").textContent = itemTitle.value.trim() || "Project or Poster Title";
+        $("#previewSubtitle").textContent = itemLabel.value.trim() || "Photoshop Design";
+        $("#previewYear").textContent = itemYear.value.trim() || "2026";
+        $("#previewMark").textContent = itemMark.value.trim() || (isPoster ? "Ps" : "WEB");
+
+        // Format & Card Ratio
+        const previewThumb = $("#previewThumb");
+        const previewCard = $("#previewCard");
+        const previewSizeBadge = $("#previewSizeBadge");
+        if (previewThumb) previewThumb.style.aspectRatio = isPoster ? "3/4" : "16/10";
+        if (previewCard) previewCard.classList.toggle("is-poster", isPoster);
+        if (previewSizeBadge) previewSizeBadge.textContent = isPoster ? "Poster Size (3:4)" : "Landscape (16:10)";
+
+        // Website Live Link detection
+        const linkVal = (itemLink.value || "").trim();
+        const hasWebLink = !!linkVal && (linkVal.startsWith("http://") || linkVal.startsWith("https://") || linkVal.startsWith("//"));
+        const previewSiteBadge = $("#previewSiteBadge");
+        const previewOverlayText = $("#previewOverlayText");
+        if (previewSiteBadge) previewSiteBadge.style.display = hasWebLink ? "inline-flex" : "none";
+        if (previewOverlayText) {
+          previewOverlayText.textContent = hasWebLink ? "Visit Live Website ↗" : (isPoster ? "Request Poster / Design ↗" : "Request Similar ↗");
+        }
+
+        const imgUrl = itemImageUrl.value.trim();
+        const previewArt = $("#previewArt");
+        if (imgUrl) {
+          const transformed = typeof getImageKitUrl === "function"
+            ? (isPoster
+                ? getImageKitUrl(imgUrl, { width: 640, height: 850, quality: 85, format: "auto" })
+                : getImageKitUrl(imgUrl, { width: 720, height: 450, quality: 80, format: "auto" }))
+            : imgUrl;
+          previewArt.style.background = `url('${transformed}') center/cover`;
+          $("#previewMark").style.display = "none";
+        } else {
+          const cat = itemCategory.value;
+          let grad = "linear-gradient(135deg,#2a0a0c,#E52B32)";
+          if (cat === "web") grad = "linear-gradient(135deg,#1c1c1c,#3a0d10)";
+          if (cat === "system") grad = "linear-gradient(135deg,#101820,#1d2b3a)";
+          if (cat === "print") grad = "linear-gradient(135deg,#1a1a1a,#444)";
+          previewArt.style.background = grad;
+          $("#previewMark").style.display = "block";
+        }
+      }
+
+      [itemTitle, itemCategory, itemLabel, itemYear, itemMark, itemImageUrl, itemLink].forEach(el => {
+        el.addEventListener("input", updateLivePreview);
+        el.addEventListener("change", updateLivePreview);
+      });
+
+      // Image Upload directly to ImageKit
+      const fileInput = $("#fileInput");
+      const dropZone = $("#dropZone");
+      const uploadProgress = $("#uploadProgress");
+      const uploadProgressText = $("#uploadProgressText");
+
+      dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
+      dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleImageUpload(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files && fileInput.files[0]) {
+          handleImageUpload(fileInput.files[0]);
+        }
+      });
+
+      async function handleImageUpload(file) {
+        if (!file) return;
+
+        // Instant local preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          $("#previewArt").style.background = `url('${e.target.result}') center/cover`;
+          $("#previewMark").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+
+        // Upload progress display
+        uploadProgress.style.display = "block";
+        uploadProgress.className = "upload-progress";
+        uploadProgressText.textContent = `Uploading "${file.name}" to ImageKit CDN...`;
+
+        try {
+          if (typeof uploadImageToImageKit === "function") {
+            const folder = $("#itemCategory").value === "design" ? "/posters" : "/projects";
+            const res = await uploadImageToImageKit(file, {
+              folder: folder,
+              tags: ["portfolio", $("#itemCategory").value]
+            });
+
+            if (res && res.url) {
+              itemImageUrl.value = res.url;
+              uploadProgress.className = "upload-progress success";
+              uploadProgressText.textContent = `✓ Uploaded to ImageKit! CDN URL generated.`;
+              updateLivePreview();
+              showToast("Image successfully uploaded to ImageKit CDN!", "success");
+              return;
+            }
+          }
+          throw new Error("ImageKit upload handler unavailable");
+        } catch (err) {
+          console.warn("[Upload] Direct ImageKit upload note:", err.message);
+          uploadProgress.className = "upload-progress error";
+          uploadProgressText.textContent = `Upload Notice: ${err.message}. You can also paste an ImageKit path/URL directly.`;
+        }
+      }
+
+      // Upload Form Submit -> Firebase
+      const uploadForm = $("#uploadForm");
+      const publishBtn = $("#publishBtn");
+
+      uploadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const title = itemTitle.value.trim();
+        const category = itemCategory.value;
+        const format = $("#fmtPoster").checked ? "poster" : "landscape";
+        const label = itemLabel.value.trim();
+        const year = itemYear.value.trim() || "2026";
+        const mark = itemMark.value.trim() || (format === "poster" ? "Ps" : "WEB");
+        const image = itemImageUrl.value.trim();
+        const link = $("#itemLink").value.trim();
+        const order = Number($("#itemOrder").value) || 1;
+
+        if (!title || !label) {
+          showToast("Please fill in the required fields.", "error");
+          return;
+        }
+
+        publishBtn.disabled = true;
+        publishBtn.textContent = "Publishing to Firebase...";
+
+        try {
+          if (typeof uploadProjectToFirebase === "function") {
+            const res = await uploadProjectToFirebase({
+              title, category, format, label, year, mark, image, link, order
+            });
+
+            if (res && res.success) {
+              showToast(`"${title}" published successfully to your portfolio!`, "success");
+              uploadForm.reset();
+              $("#itemYear").value = "2026";
+              $("#itemMark").value = "Ps";
+              $("#itemOrder").value = "1";
+              uploadProgress.style.display = "none";
+              updateLivePreview();
+              loadAllData();
+            }
+          } else {
+            throw new Error("Firebase upload helper not found.");
+          }
+        } catch (err) {
+          console.error("Upload error:", err);
+          showToast(err.message || "Failed to publish item to Firebase.", "error");
+        } finally {
+          publishBtn.disabled = false;
+          publishBtn.textContent = "Publish Project / Poster ↗";
+        }
+      });
+
+      // Data Load & Rendering
+      let currentItems = [];
+      let currentMessages = [];
+
+      async function loadAllData() {
+        checkServicesStatus();
+        await renderItemsTable();
+        await renderMessagesTable();
+      }
+
+      async function renderItemsTable() {
+        const tbody = $("#itemsTableBody");
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--grey)">Loading items...</td></tr>`;
+
+        try {
+          if (typeof fetchPortfolioWorks === "function") {
+            currentItems = (await fetchPortfolioWorks()) || [];
+            $("#itemCount").textContent = currentItems.length;
+
+            if (currentItems.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--grey);padding:32px">No items found in Firebase. Use the Upload tab to add your first project or poster!</td></tr>`;
+              return;
+            }
+
+            tbody.innerHTML = currentItems.map((item) => {
+              const isPoster = item.format === "poster" || item.category === "design" || item.category === "print";
+              const thumb = item.image
+                ? `<img src="${typeof getImageKitUrl === 'function' ? (isPoster ? getImageKitUrl(item.image, { width: 100, height: 130 }) : getImageKitUrl(item.image, { width: 140, height: 90 })) : item.image}" class="item-thumb-img" style="${isPoster ? 'aspect-ratio:3/4;height:64px;width:auto;' : 'height:48px;'}" alt="${item.title}">`
+                : `<div class="item-thumb-gradient" style="${isPoster ? 'aspect-ratio:3/4;height:64px;width:auto;' : 'height:48px;'}background:${item.art || 'linear-gradient(135deg,#222,#444)'}"><span>${item.mark || (isPoster ? 'Ps' : 'IK')}</span></div>`;
+
+              const webLinkHtml = item.link
+                ? `<br><a href="${item.link}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;color:var(--red);font-size:.72rem;margin-top:4px;text-decoration:none">🌐 Live Site ↗</a>`
+                : '';
+
+              return `
+                <tr>
+                  <td>${thumb}</td>
+                  <td><b>${item.title}</b>${webLinkHtml}</td>
+                  <td>
+                    <span class="badge-status">${item.category}</span>
+                    <small style="display:block;color:#777;margin-top:2px">${isPoster ? '🖼 Poster (3:4)' : '💻 Landscape'}</small>
+                  </td>
+                  <td>${item.label || '-'}</td>
+                  <td>${item.year || '-'}</td>
+                  <td><small style="color:#888">${item.source || 'default'}</small></td>
+                  <td>
+                    <button class="btn-delete" data-id="${item.id}" data-source="${item.source || 'realtime'}" data-title="${item.title}">
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join("");
+
+            // Attach delete listeners
+            $$(".btn-delete", tbody).forEach(btn => {
+              btn.addEventListener("click", async () => {
+                const id = btn.dataset.id;
+                const title = btn.dataset.title;
+                const source = btn.dataset.source;
+                if (confirm(`Are you sure you want to delete "${title}"?`)) {
+                  try {
+                    await deleteProjectFromFirebase(id, source);
+                    showToast(`Deleted "${title}".`, "success");
+                    renderItemsTable();
+                  } catch (delErr) {
+                    showToast("Delete failed: " + delErr.message, "error");
+                  }
+                }
+              });
+            });
+          }
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#ff8a8e">Error loading items: ${err.message}</td></tr>`;
+        }
+      }
+
+      async function renderMessagesTable() {
+        const tbody = $("#messagesTableBody");
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--grey)">Loading inquiries...</td></tr>`;
+
+        try {
+          if (typeof fetchContactMessages === "function") {
+            currentMessages = (await fetchContactMessages()) || [];
+            $("#msgCount").textContent = currentMessages.length;
+
+            if (currentMessages.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--grey);padding:32px">No inquiries received yet.</td></tr>`;
+              return;
+            }
+
+            tbody.innerHTML = currentMessages.map(m => {
+              const d = m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "-";
+              const cleanContact = (m.contact || "").replace(/[^0-9]/g, "");
+              const waBtn = cleanContact.length >= 10
+                ? `<a href="https://wa.me/${cleanContact}" target="_blank" class="btn btn-sm" style="padding:4px 8px;font-size:.65rem">WhatsApp</a>`
+                : "";
+
+              return `
+                <tr>
+                  <td><small style="color:#888">${d}</small></td>
+                  <td><b>${m.name || "Anonymous"}</b></td>
+                  <td>${m.contact || "-"}</td>
+                  <td><span class="badge-status">${m.projectType || "General"}</span></td>
+                  <td>${m.budget || "-"}</td>
+                  <td style="max-width:240px;font-size:.8rem;color:#bbb">${m.details || "-"}</td>
+                  <td>${waBtn}</td>
+                </tr>
+              `;
+            }).join("");
+          }
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#ff8a8e">Error loading inquiries: ${err.message}</td></tr>`;
+        }
+      }
+
+      $("#refreshItemsBtn").addEventListener("click", renderItemsTable);
+      $("#refreshMsgsBtn").addEventListener("click", renderMessagesTable);
+
+      function checkServicesStatus() {
+        const fb = typeof getFirebaseStatus === "function" ? getFirebaseStatus() : null;
+        const ik = typeof getImageKitStatus === "function" ? getImageKitStatus() : null;
+
+        const dbBadge = $("#dbStatusBadge");
+        if (fb && fb.configured) {
+          dbBadge.innerHTML = `<i></i> Online (${fb.hasRealtimeDb ? 'RTDB' : 'Firestore'})`;
+          dbBadge.classList.remove("offline");
+          $("#cfgFirebaseStatus").innerHTML = `<span style="color:#10b981">Connected</span> to project <code>${fb.projectId}</code> (${fb.hasRealtimeDb ? 'Realtime DB' : 'Firestore'})`;
+        } else {
+          dbBadge.innerHTML = `<i></i> Offline / Demo Mode`;
+          dbBadge.classList.add("offline");
+          $("#cfgFirebaseStatus").innerHTML = `<span style="color:#f59e0b">Offline</span> (Credentials in <code>firebase-config.js</code> needed for live database)`;
+        }
+
+        if (ik && ik.configured) {
+          $("#cfgImageKitStatus").innerHTML = `<span style="color:#10b981">Connected</span> to endpoint <code>${ik.urlEndpoint}</code>`;
+        } else {
+          $("#cfgImageKitStatus").innerHTML = `<span style="color:#f59e0b">Unconfigured</span> (Set <code>urlEndpoint</code> in <code>imagekit-config.js</code>)`;
+        }
+      }
+
+      loadAllData();
+    })();
+  </script>
+</body>
+</html>
