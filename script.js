@@ -11,13 +11,23 @@ const CONFIG = {
   instagramUrl: "https://instagram.com/irshadkolathur"   // TODO: replace with your real Instagram link
 };
 
-// Replace these sample projects with your real work.
-// Optional: add  image: "images/your-file.jpg"  to show a real screenshot.
+// Default projects fallback.
+// In index.html, the top 2 web, top 2 system, and top 2 posters are displayed.
+// In works.html, all projects and remaining posters are displayed.
 const WORKS = [
-  { title: "Business Website",        category: "web",    label: "Web Development",   year: "2026", art: "linear-gradient(135deg,#1c1c1c,#3a0d10)", mark: "WEB", link: "https://example.com", format: "landscape" },
-  { title: "Management System",       category: "system", label: "Admin Dashboard",   year: "2026", art: "linear-gradient(135deg,#101820,#1d2b3a)", mark: "SYS", format: "landscape" },
-  { title: "Social Media Creatives",  category: "design", label: "Photoshop Design",  year: "2026", art: "linear-gradient(135deg,#2a0a0c,#E52B32)", mark: "Ps",  format: "poster" },
-  { title: "Brochure Layout",         category: "design", label: "InDesign Layout",   year: "2026", art: "linear-gradient(135deg,#1a1a1a,#444)",    mark: "Id",  format: "poster" }
+  // 1. Web Works (Top 2 for main homepage)
+  { title: "Business Corporate Site",     category: "web",    label: "Web Development",       year: "2026", art: "linear-gradient(135deg,#1c1c1c,#3a0d10)", mark: "WEB", link: "https://example.com", format: "landscape", featured: true,  order: 1 },
+  { title: "Agency Portfolio Platform",  category: "web",    label: "Responsive Web Dev",    year: "2026", art: "linear-gradient(135deg,#17202a,#0e1626)", mark: "DEV", link: "https://example.com", format: "landscape", featured: true,  order: 2 },
+
+  // 2. System Management Works (Top 2 for main homepage)
+  { title: "Enterprise Management System", category: "system", label: "Admin & Operations Hub", year: "2026", art: "linear-gradient(135deg,#101820,#1d2b3a)", mark: "SYS", format: "landscape", featured: true,  order: 3 },
+  { title: "Inventory & CRM Dashboard",   category: "system", label: "Realtime Analytics",    year: "2026", art: "linear-gradient(135deg,#0c1a17,#122e28)", mark: "CRM", format: "landscape", featured: true,  order: 4 },
+
+  // 3. Posters & Graphic Design (Top 2 for main homepage + remaining for all works page)
+  { title: "Typography Event Poster",    category: "design", label: "Photoshop Creative",    year: "2026", art: "linear-gradient(135deg,#2a0a0c,#E52B32)", mark: "Ps",  format: "poster",    featured: true,  order: 5 },
+  { title: "Cyberpunk Film Poster",      category: "design", label: "Visual Art & Poster",   year: "2026", art: "linear-gradient(135deg,#1d0d29,#571845)", mark: "Ps",  format: "poster",    featured: true,  order: 6 },
+  { title: "Minimalist Brand Brochure",  category: "print",  label: "InDesign Layout",       year: "2026", art: "linear-gradient(135deg,#1a1a1a,#444444)", mark: "Id",  format: "poster",    featured: false, order: 7 },
+  { title: "Concert Festival Poster",    category: "design", label: "Photoshop Poster",      year: "2026", art: "linear-gradient(135deg,#231505,#522e0a)", mark: "Ps",  format: "poster",    featured: false, order: 8 }
 ];
 
 (function () {
@@ -116,6 +126,38 @@ const WORKS = [
     }
   }
 
+  /**
+   * Filter the works list for the homepage:
+   * Extracts top 2 websites, top 2 management systems, and top 2 creative posters (6 items total).
+   */
+  function extractMainWorks(list) {
+    if (!Array.isArray(list)) return [];
+
+    const isPosterItem = (w) =>
+      w.format === "poster" || w.category === "design" || w.category === "print" || !!w.isPoster;
+
+    const webItems = list.filter(w => w.category === "web" && !isPosterItem(w));
+    const sysItems = list.filter(w => w.category === "system" && !isPosterItem(w));
+    const posterItems = list.filter(w => isPosterItem(w));
+
+    const sortFn = (a, b) => {
+      const featA = a.featured !== false ? 1 : 0;
+      const featB = b.featured !== false ? 1 : 0;
+      if (featB !== featA) return featB - featA;
+      return (Number(a.order) || 99) - (Number(b.order) || 99);
+    };
+
+    webItems.sort(sortFn);
+    sysItems.sort(sortFn);
+    posterItems.sort(sortFn);
+
+    return [
+      ...webItems.slice(0, 2),
+      ...sysItems.slice(0, 2),
+      ...posterItems.slice(0, 2)
+    ];
+  }
+
   /* ---------- Works filter listeners ---------- */
   $$("#filters button").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -126,16 +168,20 @@ const WORKS = [
   });
 
   /* ---------- Load projects (Default fallback + Dynamic Firestore sync) ---------- */
+  const isAllWorksView = grid && grid.dataset.view === "all";
+
   async function loadPortfolioWorks() {
     // 1. Initial immediate render from default local array
-    renderWorks(WORKS);
+    const initialList = isAllWorksView ? WORKS : extractMainWorks(WORKS);
+    renderWorks(initialList);
 
-    // 2. Fetch dynamic projects from Firebase Firestore if available
+    // 2. Fetch dynamic projects from Firebase Firestore / Realtime DB if available
     if (typeof window.fetchPortfolioWorks === "function") {
       try {
         const dynamicWorks = await window.fetchPortfolioWorks();
         if (dynamicWorks && dynamicWorks.length > 0) {
-          renderWorks(dynamicWorks);
+          const listToRender = isAllWorksView ? dynamicWorks : extractMainWorks(dynamicWorks);
+          renderWorks(listToRender);
           if (window.ScrollTrigger) window.ScrollTrigger.refresh();
         }
       } catch (err) {
@@ -352,17 +398,31 @@ ${inquiryData.details}`;
     scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true }
   });
 
-  /* Scroll reveals */
-  const reveal = $$(".reveal");
-  gsap.set(reveal, { opacity: 0, y: 42, filter: "blur(5px)" });
-  ScrollTrigger.batch(reveal, {
-    start: "top 91%",
-    once: true,
-    onEnter: batch => gsap.to(batch, {
-      opacity: 1, y: 0, filter: "blur(0px)",
-      duration: .75, ease: "power3.out", stagger: .09, overwrite: true,
-      onComplete: () => gsap.set(batch, { clearProps: "filter,transform,opacity" })
-    })
+  /* Scroll reveals — reliable per-element triggers with safety fallback */
+  const revealElements = $$(".reveal:not(.title)");
+  revealElements.forEach(el => {
+    // If element is already in the viewport or prefers-reduced-motion, reveal immediately
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.95 && rect.bottom > 0) {
+      el.style.opacity = "1";
+      el.style.transform = "none";
+      el.style.filter = "none";
+      return;
+    }
+
+    gsap.fromTo(el,
+      { opacity: 0, y: 32, filter: "blur(4px)" },
+      {
+        opacity: 1, y: 0, filter: "blur(0px)",
+        duration: .75, ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 96%",
+          once: true,
+          onEnter: () => gsap.set(el, { clearProps: "all" })
+        }
+      }
+    );
   });
 
   /* Skill bars */
