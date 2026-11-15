@@ -18,9 +18,22 @@
   /* Run a callback once the intro loader has gone */
   function afterLoader(cb) {
     const l = document.getElementById("siteLoader");
-    if (!l || l.classList.contains("is-hidden")) { cb(); return; }
+    if (!l || l.classList.contains("is-hidden")) {
+      cb();
+      if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+      return;
+    }
     let done = false;
-    const go = () => { if (done) return; done = true; mo.disconnect(); cb(); };
+    const go = () => {
+      if (done) return;
+      done = true;
+      mo.disconnect();
+      cb();
+      if (window.ScrollTrigger) {
+        window.requestAnimationFrame(() => window.ScrollTrigger.refresh());
+        setTimeout(() => window.ScrollTrigger.refresh(), 200);
+      }
+    };
     const mo = new MutationObserver(() => { if (l.classList.contains("is-hidden")) go(); });
     mo.observe(l, { attributes: true, attributeFilter: ["class"] });
     setTimeout(go, 5200);
@@ -86,46 +99,62 @@
 
   /* ---------- Hero: per-letter headline + word-by-word subtitle ---------- */
   const h1 = $(".hero h1");
-  const chars = $$(".hero h1 .block").flatMap(splitChars);
-  gsap.set(chars, { opacity: 0, yPercent: 110, rotateX: -90, transformOrigin: "50% 100%" });
-  const subWords = splitWords($(".hero-sub"));
-  gsap.set(subWords, { yPercent: 115, opacity: 0 });
+  if (h1) {
+    const chars = $$(".hero h1 .block").flatMap(splitChars);
+    gsap.set(chars, { opacity: 0, yPercent: 110, rotateX: -90, transformOrigin: "50% 100%" });
+    const subWords = splitWords($(".hero-sub"));
+    gsap.set(subWords, { yPercent: 115, opacity: 0 });
 
-  afterLoader(() => {
-    gsap.to(chars, {
-      opacity: 1, yPercent: 0, rotateX: 0, transformPerspective: 600,
-      duration: .9, ease: "back.out(1.6)", stagger: .03,
-      onComplete: () => { gsap.set(chars, { clearProps: "transform,opacity" }); h1.classList.add("ready"); }
+    afterLoader(() => {
+      gsap.to(chars, {
+        opacity: 1, yPercent: 0, rotateX: 0, transformPerspective: 600,
+        duration: .9, ease: "back.out(1.6)", stagger: .03,
+        onComplete: () => { gsap.set(chars, { clearProps: "transform,opacity" }); h1.classList.add("ready"); }
+      });
+      gsap.to(subWords, { yPercent: 0, opacity: 1, duration: .7, ease: "power3.out", stagger: .025, delay: .6 });
+      gsap.from(".hero .eyebrow .line", { scaleX: 0, transformOrigin: "left", duration: .9, ease: "power3.out", delay: .2 });
     });
-    gsap.to(subWords, { yPercent: 0, opacity: 1, duration: .7, ease: "power3.out", stagger: .025, delay: .6 });
-    gsap.from(".hero .eyebrow .line", { scaleX: 0, transformOrigin: "left", duration: .9, ease: "power3.out", delay: .2 });
-  });
+  }
 
   /* Portrait: ken-burns, scroll parallax, scroll scale */
-  const img = $(".portrait-image");
-  if (img) {
-    gsap.set(img, { scale: 1.12 });
-    gsap.from(img, { clipPath: "inset(100% 0 0 0)", duration: 1.3, ease: "power4.inOut", delay: 1.3 });
-    gsap.to(img, { scale: 1.2, duration: 9, yoyo: true, repeat: -1, ease: "sine.inOut" });
-    gsap.to(img, { yPercent: 6, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-  }
-  gsap.to(".portrait", { scale: .93, y: -30, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
-  gsap.to(".hero-text", { yPercent: -10, opacity: .25, ease: "none", scrollTrigger: { trigger: ".hero", start: "20% top", end: "bottom top", scrub: true } });
-  gsap.to(".watermark", { xPercent: -14, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  const heroEl = $(".hero");
+  if (heroEl) {
+    const img = $(".portrait-image");
+    if (img) {
+      gsap.set(img, { scale: 1.12 });
+      afterLoader(() => {
+        gsap.fromTo(img,
+          { clipPath: "inset(100% 0 0 0)" },
+          {
+            clipPath: "inset(0% 0 0 0)",
+            duration: 1.2,
+            ease: "power4.inOut",
+            delay: 0.2,
+            onComplete: () => gsap.set(img, { clearProps: "clipPath" })
+          }
+        );
+      });
+      gsap.to(img, { scale: 1.2, duration: 9, yoyo: true, repeat: -1, ease: "sine.inOut" });
+      gsap.to(img, { yPercent: 6, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+    }
+    gsap.to(".portrait", { scale: .93, y: -30, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+    gsap.to(".hero-text", { yPercent: -10, opacity: .25, ease: "none", scrollTrigger: { trigger: ".hero", start: "20% top", end: "bottom top", scrub: true } });
+    gsap.to(".watermark", { xPercent: -14, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
-  /* Mouse parallax across the hero (uses CSS `translate`, no clash with GSAP transforms) */
-  if (fine) {
-    const mouse = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
-    window.addEventListener("pointermove", e => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; }, { passive: true });
-    const targets = [[".portrait-image", 14], [".chip-a", -34], [".chip-b", 30], [".corner-br", -14], [".corner-tl", 14], [".watermark", -26]]
-      .map(([s, d]) => ({ el: $(s), d })).filter(t => t.el);
-    let heroVisible = true;
-    new IntersectionObserver(e => (heroVisible = e[0].isIntersecting)).observe($(".hero"));
-    gsap.ticker.add(() => {
-      if (!heroVisible) return;
-      cur.x += (mouse.x - cur.x) * .07; cur.y += (mouse.y - cur.y) * .07;
-      targets.forEach(t => (t.el.style.translate = `${cur.x * t.d * 2}px ${cur.y * t.d * 2}px`));
-    });
+    /* Mouse parallax across the hero (uses CSS `translate`, no clash with GSAP transforms) */
+    if (fine) {
+      const mouse = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
+      window.addEventListener("pointermove", e => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; }, { passive: true });
+      const targets = [[".portrait-image", 14], [".chip-a", -34], [".chip-b", 30], [".corner-br", -14], [".corner-tl", 14], [".watermark", -26]]
+        .map(([s, d]) => ({ el: $(s), d })).filter(t => t.el);
+      let heroVisible = true;
+      new IntersectionObserver(e => (heroVisible = e[0].isIntersecting)).observe(heroEl);
+      gsap.ticker.add(() => {
+        if (!heroVisible) return;
+        cur.x += (mouse.x - cur.x) * .07; cur.y += (mouse.y - cur.y) * .07;
+        targets.forEach(t => (t.el.style.translate = `${cur.x * t.d * 2}px ${cur.y * t.d * 2}px`));
+      });
+    }
   }
 
   /* ---------- Section kickers (scramble) + titles (word mask reveal) ---------- */
@@ -275,11 +304,21 @@
   }
 
   /* ---------- Misc scroll motion ---------- */
-  gsap.from(".tool", { opacity: 0, scale: .7, y: 30, duration: .7, ease: "back.out(1.7)", stagger: .1, scrollTrigger: { trigger: ".tools", start: "top 88%", once: true } });
-  gsap.from(".ticks li", { opacity: 0, x: -18, duration: .6, ease: "power3.out", stagger: .12, scrollTrigger: { trigger: ".ticks", start: "top 90%", once: true } });
-  gsap.from(".contact-link", { opacity: 0, x: -40, duration: .7, ease: "power3.out", stagger: .12, scrollTrigger: { trigger: ".contact-links", start: "top 90%", once: true } });
-  gsap.from(".socials a", { opacity: 0, scale: 0, duration: .6, ease: "back.out(2)", stagger: .1, scrollTrigger: { trigger: ".socials", start: "top 95%", once: true } });
-  gsap.from(".footer-inner > *", { opacity: 0, y: 24, duration: .7, ease: "power3.out", stagger: .12, scrollTrigger: { trigger: ".footer", start: "top 98%", once: true } });
+  gsap.from(".tool", { opacity: 0, scale: .7, y: 30, duration: .7, ease: "back.out(1.7)", stagger: .1, scrollTrigger: { trigger: ".tools", start: "top 88%", once: true }, onComplete: () => gsap.set(".tool", { clearProps: "all" }) });
+  gsap.from(".ticks li", { opacity: 0, x: -18, duration: .6, ease: "power3.out", stagger: .12, scrollTrigger: { trigger: ".ticks", start: "top 90%", once: true }, onComplete: () => gsap.set(".ticks li", { clearProps: "all" }) });
+  gsap.from(".contact-link", {
+    opacity: 0, x: -40, duration: .7, ease: "power3.out", stagger: .12,
+    scrollTrigger: { trigger: ".contact-links", start: "top 96%", once: true },
+    onComplete: () => gsap.set(".contact-link", { clearProps: "all" })
+  });
+  gsap.from(".socials a", {
+    opacity: 0, scale: 0, duration: .6, ease: "back.out(2)", stagger: .1,
+    scrollTrigger: { trigger: ".socials", start: "top 97%", once: true },
+    onComplete: () => gsap.set(".socials a", { clearProps: "all" })
+  });
+  gsap.from(".footer-inner > *", { opacity: 0, y: 24, duration: .7, ease: "power3.out", stagger: .12, scrollTrigger: { trigger: ".footer", start: "top 98%", once: true }, onComplete: () => gsap.set(".footer-inner > *", { clearProps: "all" }) });
 
-  window.addEventListener("load", () => ScrollTrigger.refresh());
+  window.addEventListener("load", () => {
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  });
 })();
