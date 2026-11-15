@@ -37,6 +37,7 @@
 
       <nav class="nav-links" id="navLinks" aria-label="Main navigation">
         <a href="#works">Work</a>
+        <a href="works.html" style="color:var(--red);">All Works ↗</a>
         <a href="#about">About</a>
         <a href="#services">Playground</a>
         <a href="#faq">FAQ</a>
@@ -55,7 +56,8 @@
     <a href="#about">ABOUT</a>
     <a href="#services">DESIGN &amp; SERVICES</a>
     <a href="#skills">SKILLS</a>
-    <a href="#works">WORKS</a>
+    <a href="#works">MAIN WORKS</a>
+    <a href="works.html" style="color:var(--red);">ALL WORKS &amp; POSTERS ↗</a>
     <a href="#faq">FAQ</a>
     <a href="#contact" class="mobile-contact">LET'S TALK <span aria-hidden="true">↗</span></a>
   </nav>
@@ -271,13 +273,16 @@
       </div>
     </section>
 
-    <!-- RECENT WORKS -->
+    <!-- MAIN / FEATURED WORKS -->
     <section class="section alt" id="works">
       <div class="container">
         <div class="works-head">
           <div>
-            <p class="kicker">04 / Recent works</p>
-            <h2 class="title reveal">RECENT <span class="red">PROJECTS.</span></h2>
+            <p class="kicker">04 / Main Works</p>
+            <h2 class="title reveal">SELECTED <span class="red">WORKS.</span></h2>
+            <p style="color:var(--grey);font-size:.82rem;font-family:'Space Grotesk',sans-serif;margin-top:8px;">
+              Curated top 2 websites, 2 management systems, and 2 creative posters.
+            </p>
           </div>
           <div class="filters reveal" id="filters">
             <button class="active" data-filter="all">All</button>
@@ -286,7 +291,16 @@
             <button data-filter="design">Posters &amp; Design</button>
           </div>
         </div>
-        <div class="works-grid" id="worksGrid"><!-- rendered by portfolio.js --></div>
+        <div class="works-grid" id="worksGrid" data-view="main"><!-- rendered by script.js (top 2 per category) --></div>
+
+        <div class="works-cta reveal">
+          <a href="works.html" class="btn">
+            View All Works &amp; Posters Gallery ↗
+          </a>
+          <p>
+            Explore all websites, management systems, and the complete posters archive.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -357,7 +371,7 @@
             <p class="muted reveal">Fill in the form and it opens a ready-to-send WhatsApp message to me. Or reach out
               directly using any option below.</p>
 
-            <div class="contact-links reveal">
+            <div class="contact-links">
               <a href="tel:+918848987685" class="contact-link">
                 <span class="ci">☎</span>
                 <div><small>Phone</small><b>+91 88489 87685</b></div>
@@ -376,7 +390,7 @@
               </a>
             </div>
 
-            <div class="socials reveal">
+            <div class="socials">
               <a href="#" data-wa target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24">
                   <use href="#i-wa" />
                 </svg></a>
@@ -520,6 +534,11 @@
         loader.classList.add("is-hidden");
         document.body.classList.remove("loading");
         window.setTimeout(() => loader.remove(), 800);
+        if (window.ScrollTrigger) {
+          window.requestAnimationFrame(() => window.ScrollTrigger.refresh());
+          window.setTimeout(() => window.ScrollTrigger.refresh(), 200);
+          window.setTimeout(() => window.ScrollTrigger.refresh(), 600);
+        }
       };
 
       document.body.classList.add("loading");
